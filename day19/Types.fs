@@ -6,8 +6,8 @@ type Rule =
     | A
     | B 
     | Ref of int
-    | Rules of Rule[]
-    | Or of Rule[] 
+    | Rules of List<Rule>
+    | Or of List<Rule> 
 
 
 let rec toS (r:Rule) : String =
@@ -16,7 +16,7 @@ let rec toS (r:Rule) : String =
     | B -> "B"
     | Ref x -> sprintf "%d" x
     | Or rs -> sprintf "(%s)" (rs |> Seq.map toS |> String.concat "|")
-    | Rules rs -> sprintf "%s" (rs |> Seq.map toS |> String.concat "")
+    | Rules rs -> sprintf "%s" (rs |> Seq.map toS |> String.concat " ")
 
 
 
