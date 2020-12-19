@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://docs.microsoft.com/dotnet/fsharp
-
-open System
+﻿open System
 open day19.Types
 open day19.Parser 
 open day19.IO
@@ -51,7 +49,6 @@ let checkMatch (rules:RuleMap) (rule:Rule) (message:String): bool =
     let matched = matches [rule] chars lookup 
     let res = fst matched 
     let rest = snd matched 
-//    printfn "Match result: %A with rest %A" res rest
     res
 
 type InputData (rules:RuleMap, messages:String[]) as self =
@@ -85,11 +82,6 @@ let main argv =
     let rule = active.Rules.[0]
     let matched = input.Messages |> Array.filter (checkMatch active.Rules rule)
     printfn "%A %A" matched matched.Length  
-
-//    let s1 = "baba"  
-//    let s1 = "aaaaabbaabaaaaababaa"
-//    printfn "Res: %A" (checkMatch map2 map2.[0] s1) 
-//    let map2 = map
     0
     
     

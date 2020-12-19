@@ -12,7 +12,6 @@ let parseItem (s:String) : Rule =
 
 let parseSubRule (s:String) : Rule  =
     let ts = s.Trim() 
-//    printfn "parseSubRule (%A)" ts 
     let rules = ts.Split ' ' |> Array.map parseItem |> List.ofSeq 
     Rules rules
     

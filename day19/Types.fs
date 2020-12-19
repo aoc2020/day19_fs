@@ -9,7 +9,6 @@ type Rule =
     | Rules of List<Rule>
     | Or of List<Rule> 
 
-
 let rec toS (r:Rule) : String =
     match r with
     | A -> "A"
