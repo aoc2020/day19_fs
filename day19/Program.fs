@@ -26,7 +26,13 @@ let rec matches (rule:Rule) (chars:List<char>) (exhaustive:bool) (rules:RuleMap)
         match subMatch with
         | false,_ -> matches (Or(subs)) chars exhaustive rules  
         | true,_ -> subMatch
-    | Rules ([]), list -> checkExhaustive(true,list)
+    | Rules [], list -> checkExhaustive(true,list)
+    | Rules (Or(ors)::tail), _ ->
+        let rewrite = Or(ors |> List.map (fun o -> Rules (o::tail)))
+        in matches rewrite chars exhaustive rules
+    | Rules (Ref(i)::tail),_ ->
+        let rewrite = Rules(rules.[i]::tail)
+        in matches rewrite chars exhaustive rules 
     | Rules (sub::subs), _ ->
         let subMatch = matches sub chars false rules
         match subMatch with
@@ -68,13 +74,22 @@ let readRules (input:String) : InputData  =
     let map = toMap compressed
     InputData (map,data) 
 
+let modify (input: InputData) =
+    let newRules = updateMap input.Rules
+    in InputData(newRules,input.Messages) 
+
 [<EntryPoint>]
 let main argv =
-    let task = 1
-    let input = readRules "/Users/xeno/projects/aoc2020/day19_fs/input.txt"
-    printfn "%A" input 
-    let rule = input.Rules.[0]
-    let matched = input.Messages |> Array.filter (checkMatch input.Rules rule)
+    let task = 2
+    let input = readRules "/Users/xeno/projects/aoc2020/day19_fs/input3.txt"
+    printfn "%A" input
+    let active =
+        if task = 1 then
+            input
+        else
+            modify input
+    let rule = active.Rules.[0]
+    let matched = input.Messages |> Array.filter (checkMatch active.Rules rule)
     printfn "%A %A" matched matched.Length  
 
 //    let s1 = "baba"  
