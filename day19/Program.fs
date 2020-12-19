@@ -6,7 +6,7 @@ open day19.Parser
 open day19.IO
 
 let rec matches (rule:Rule) (chars:List<char>) (exhaustive:bool): bool*List<Char> =
-    printfn "matches %s %A %A" (toS rule) chars exhaustive
+//    printfn "matches %s %A %A" (toS rule) chars exhaustive
     let checkExhaustive (res:bool*List<char>) =
         match exhaustive,res with
         | false,_ -> res
@@ -40,12 +40,12 @@ let checkMatch (rule:Rule) (message:String) : bool =
     let matched = matches rule chars true 
     let res = fst matched
     let rest = snd matched 
-    printfn "Match result: %A with rest %A" res rest
+//    printfn "Match result: %A with rest %A" res rest
     res
 
 [<EntryPoint>]
 let main argv =
-    let input = readFile "/Users/xeno/projects/aoc2020/day19_fs/input2.txt" |> Seq.toArray
+    let input = readFile "/Users/xeno/projects/aoc2020/day19_fs/input.txt" |> Seq.toArray
     let rulesAndData = splitBySpace input
     let rules = fst rulesAndData
     let data = snd rulesAndData 
@@ -61,9 +61,9 @@ let main argv =
     printfn "Expanded rules:"
     expMap |> Map.toArray |> Array.map (fun ir -> printfn "%A: %A" (fst ir) (toS (snd ir)))
     let rule = expMap.[0]
-    let _ = checkMatch rule "ababbb" 
-//    let matched = data |> Array.filter (checkMatch rule)
-//    printfn "%A" matched  
+//    let _ = checkMatch rule "ababbb" 
+    let matched = data |> Array.filter (checkMatch rule)
+    printfn "%A %A" matched matched.Length  
     0
     
     
