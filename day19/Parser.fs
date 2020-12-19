@@ -31,4 +31,20 @@ let parseRule (s:String) : int*Rule =
     printfn "%A ==> ((%A))" index subRules
     index, (Or subRules) 
 
+type RuleMap = Map<int,Rule>
 
+let toMap (rules:(int*Rule)[]) : RuleMap =
+    rules |> Map.ofSeq     
+
+let rec expand (rule:Rule) (rules:RuleMap) : Rule =
+    let exp r = expand r rules  
+    match rule with
+    | Ref index -> exp rules.[index] 
+    | Rules rules -> Rules (rules |> Array.map exp) 
+    | Or rules -> Or (rules |> Array.map exp)
+    | A -> A
+    | B -> B
+    
+let expandMap (rules:RuleMap) : RuleMap =
+    let exp (ir:int*Rule) : int*Rule = (fst ir, expand (snd ir) rules)
+    rules |> Map.toSeq |> Seq.map exp |> Map.ofSeq 

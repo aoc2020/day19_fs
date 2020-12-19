@@ -15,8 +15,8 @@ let rec toS (r:Rule) : String =
     | A -> "A"
     | B -> "B"
     | Ref x -> sprintf "%d" x
-    | Or rs -> rs |> Seq.map toS |> String.concat "|"
-    | Rules rs -> rs |> Seq.map toS |> String.concat " "
+    | Or rs -> sprintf "(%s)" (rs |> Seq.map toS |> String.concat "|")
+    | Rules rs -> sprintf "%s" (rs |> Seq.map toS |> String.concat "")
 
 
 
