@@ -54,35 +54,33 @@ let checkMatch (rules:RuleMap) (rule:Rule) (message:String): bool =
 //    printfn "Match result: %A with rest %A" res rest
     res
 
-[<EntryPoint>]
-let main argv =
-    let input = readFile "/Users/xeno/projects/aoc2020/day19_fs/input.txt" |> Seq.toArray
+type InputData (rules:RuleMap, messages:String[]) as self =
+    member this.Rules = rules 
+    member this.Messages = messages  
+
+let readRules (input:String) : InputData  =
+    let input = readFile input |> Seq.toArray
     let rulesAndData = splitBySpace input
     let rules = fst rulesAndData
     let data = snd rulesAndData 
-    printfn "%A" rulesAndData
     let parsed = rules |> Array.map parseRule
-    let parsedPrint = parsed |> Array.map (fun s -> (fst s, toS (snd s)))   
-//    printfn "Parsed rules: %A" parsedPrint
     let compressed = parsed |> Array.map (fun s -> (fst s, compress (snd s)))
-    let compressedPrint = compressed |> Array.map (fun s -> (fst s, toS (snd s)))
-//    printfn "Compressed rules: %A" compressedPrint  
     let map = toMap compressed
-    let rule = map.[0]
-    let matched = data |> Array.filter (checkMatch map map.[0])
+    InputData (map,data) 
+
+[<EntryPoint>]
+let main argv =
+    let task = 1
+    let input = readRules "/Users/xeno/projects/aoc2020/day19_fs/input.txt"
+    printfn "%A" input 
+    let rule = input.Rules.[0]
+    let matched = input.Messages |> Array.filter (checkMatch input.Rules rule)
     printfn "%A %A" matched matched.Length  
-//    let expMap = expandMap map
-//    printfn "Expanded rules:"
-//    expMap |> Map.toArray |> Array.map (fun ir -> printfn "%A: %A" (fst ir) (toS (snd ir)))
-//    let _ = checkMatch rule "ababbb"
-//    let map2 = updateMap map
-//    printfn "Updated rules:"
-//    map2 |> Map.toArray |> Array.map (fun ir -> printfn "%A: %A" (fst ir) (toS (snd ir)))
-  
-    let s1 = "baba"  
-    let s1 = "aaaaabbaabaaaaababaa"
+
+//    let s1 = "baba"  
+//    let s1 = "aaaaabbaabaaaaababaa"
 //    printfn "Res: %A" (checkMatch map2 map2.[0] s1) 
-    let map2 = map
+//    let map2 = map
     0
     
     
