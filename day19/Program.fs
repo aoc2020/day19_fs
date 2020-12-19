@@ -5,40 +5,34 @@ open day19.Types
 open day19.Parser 
 open day19.IO
 
-let rec matches (rules:list<Rule>) (chars:List<char>) (exhaustive:bool) (lookup:(int->Rule)) : bool*List<Char> =
-//    printfn "matches %s %A %A" (toS rule) (chars |> String.Concat) exhaustive
-    let checkExhaustive (res:bool*List<char>) =
-        let r = match exhaustive,res with
-                | false,_ -> res
-                | true,(false,_) -> res
-                | true,(true,[]) -> res
-                | true,(true,_) -> false,chars
-        // printfn "<== (%A %s) : %A %s %A" (fst r) (snd r |> String.Concat) (toS rule) (chars |> String.Concat) exhaustive   
-        r 
-    match rules, chars with
-    | [A], 'a':: tail -> checkExhaustive(true,tail)
-    | [A], _  -> false, chars 
-    | [B], 'b':: tail -> checkExhaustive(true,tail)
-    | [B], _ -> false, chars 
-    | [Or ([])], _ -> false,chars
-    | [Or (sub::subs)], _ ->
-        let subMatch = checkExhaustive(matches [sub] chars exhaustive lookup) 
+let rec matches (pattern:list<Rule>) (chars:List<char>) (lookup:(int->Rule)) : bool*List<Char> =
+//    printfn "matches %A %A" pattern (chars |> String.Concat)
+    match pattern, chars with
+    | [],[] -> true,[]
+    | [], _::tail -> false, tail  
+    | A::rules, 'a':: tail -> matches rules tail lookup 
+    | A::_, _  -> false, chars 
+    | B::rules, 'b':: tail -> matches rules tail lookup 
+    | B::_, _ -> false, chars 
+    | (Or [])::_, _ -> false,chars
+    | (Or (sub::subs))::rules, _ ->
+        let subMatch = matches (sub::rules) chars lookup 
         match subMatch with
-        | false,_ -> matches [Or subs] chars exhaustive lookup 
+        | false,_ -> matches ((Or subs)::rules) chars lookup 
         | true,_ -> subMatch
-    | [Rules []], list -> checkExhaustive(true,list)
-    | [Rules (Or(ors)::tail)], _ ->
-        let rewrite = [Or(ors |> List.map (fun o -> Rules (o::tail)))]
-        in matches rewrite chars exhaustive lookup 
-    | [Rules (Ref(i)::tail)],_ ->
-        let rewrite = [Rules((lookup i)::tail)]
-        in matches rewrite chars exhaustive lookup 
-    | [Rules (sub::subs)], _ ->
-        let subMatch = matches [sub] chars false lookup 
-        match subMatch with
-        | false,_ -> false,chars
-        | true,tail -> matches ([Rules subs]) tail exhaustive lookup 
-    | [Ref ref], _ -> matches ([lookup ref]) chars exhaustive lookup  
+    | (Rules [])::rules, list -> matches rules chars lookup 
+    | (Rules (Or(alts)::tail))::rules, _ -> // todo
+        let newAlts = alts |> List.map (fun alt -> Rules(alt::tail))
+        let rewrite = Or(newAlts)::rules                                          
+        in matches rewrite chars lookup 
+    | (Rules (Ref(i)::tail))::rules,_ ->
+        let newRules = Rules((lookup i)::tail)
+        let rewrite = newRules::rules 
+        in matches rewrite chars lookup 
+    | (Rules (sub::subs)::rules), _ ->
+        let remaining = Rules(subs)::rules 
+        matches (sub::remaining) chars lookup 
+    | (Ref ref)::rules, _ -> matches ((lookup ref)::rules) chars lookup  
         
 let updateMap (map:RuleMap) : RuleMap =
     let _42 = Ref 42
@@ -53,8 +47,8 @@ let updateMap (map:RuleMap) : RuleMap =
  
 let checkMatch (rules:RuleMap) (rule:Rule) (message:String): bool =
     let chars = message.ToCharArray () |> List.ofArray
-    let lookup = (fun i -> rules.[i])
-    let matched = matches [rule] chars true lookup 
+    let lookup : (int -> Rule) = (fun i -> rules.[i])
+    let matched = matches [rule] chars lookup 
     let res = fst matched 
     let rest = snd matched 
 //    printfn "Match result: %A with rest %A" res rest
@@ -81,7 +75,7 @@ let modify (input: InputData) =
 [<EntryPoint>]
 let main argv =
     let task = 2
-    let input = readRules "/Users/xeno/projects/aoc2020/day19_fs/input3.txt"
+    let input = readRules "/Users/xeno/projects/aoc2020/day19_fs/input.txt"
     printfn "%A" input
     let active =
         if task = 1 then
